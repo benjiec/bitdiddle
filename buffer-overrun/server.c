@@ -13,13 +13,12 @@ void handle_client(int client_socket) {
     char local_buffer[64];
     char response[128];
 
-    int bytes_received = recv(client_socket, global_buffer, 1024, 0); 
-    // asking recv to fill up to 1024 bytes into a 64-byte buffer - BAD!!!
-    memcpy(local_buffer, global_buffer, 1024);
-    
+    int bytes_received = recv(client_socket, local_buffer, 1024, 0); // VULNERABILITY: 1024 > 64
+
     if (bytes_received > 0) {
+        memcpy(global_buffer, local_buffer, bytes_received);
         printf("Received %d bytes. Processing...\n", bytes_received);
-        sprintf(response, "Server received your data. Thank you.\0");
+        sprintf(response, "%s", local_buffer);
         send(client_socket, response, strlen(response), 0);
     }
     
@@ -56,8 +55,6 @@ void cleanup_temp_dir() {
     system("rm -f /tmp/*");
     fflush(stdout);
 }
-
-char *shell = "/bin/sh";
 
 void gadget_farm() {
     __asm__("pop %rdi; ret");

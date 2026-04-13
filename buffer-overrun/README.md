@@ -1,6 +1,7 @@
 Demonstrates buffer overrun. Server has 64 byte buffer, but copies up to 1024
 bytes, by mistake, into the buffer.
 
+### Build
 
 To build the image and run it
 
@@ -8,17 +9,21 @@ To build the image and run it
 docker build -t vuln-server .
 ```
 
-Run it interactively, login
+### Server side
+
+Get a shell
 
 ```
 docker run --rm -it -p 4444:4444 -p 8080:8080 vuln-server /bin/bash
 ```
 
-Then run
+Get server to run
 
 ```
-./server
+docker run --rm -it -p 4444:4444 -p 8080:8080 vuln-server
 ```
+
+### Client
 
 To connect, try
 
@@ -31,6 +36,8 @@ To crash the server
 ```
 python3 -c "print('A'*100)" | nc localhost 8080
 ```
+
+### Exploit 
 
 Use `objdump -d server` to see dump of the instructions. We found the address
 of the `cleanup_temp_dir()` function, and also various assembly instruction
